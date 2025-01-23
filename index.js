@@ -29,11 +29,9 @@ const client = new MongoClient(uri, {
 
 const verifyToken = (req, res, next) => {
   const accessToken = req.cookies.accessToken;
-  console.log("Access Token", accessToken);
   if (!accessToken) return res.status(401).send("Unauthorized Access");
 
   jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    console.log(err);
     if (err) return res.status(403).send("Unauthorized Access");
     req.user = decoded;
     next();
@@ -82,6 +80,12 @@ async function run() {
           sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
         .send({ success: true });
+    });
+
+    app.get("/check-auth", verifyToken, (req, res) => {
+      if (req.user.email !== req.query.email) {
+        return res.status(403).send("Unauthorized Access");
+      }
     });
     // Users
     app.post("/Users", async (req, res) => {
@@ -192,9 +196,12 @@ async function run() {
         .toArray();
       res.status(200).send(result);
     });
-    app.get("/check-like-status/:id", async (req, res) => {
+    app.get("/check-like-status/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
       const { user_email } = req.query;
+      if (req.user.email !== user_email) {
+        return res.status(403).send("Forbidden Access");
+      }
       const query = { artifact_id: id, user_email };
       const existingLike = await likedArtifactCollection.findOne(query);
       if (existingLike) {
