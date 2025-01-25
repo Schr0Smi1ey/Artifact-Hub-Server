@@ -9,12 +9,27 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://artifacts-hub-schr0smi1ey.web.app",
+      "https://artifacts-hub-schr0smi1ey.firebaseapp.com",
+    ],
+    methods: "GET,POST,PUT,DELETE,PATCH",
     credentials: true,
   })
 );
 app.use(express.json());
 app.use(cookieParser());
+const verifyToken = (req, res, next) => {
+  const accessToken = req.cookies.accessToken;
+  if (!accessToken) return res.status(401).send("Unauthorized Access");
+
+  jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) return res.status(403).send("Unauthorized Access");
+    req.user = decoded;
+    next();
+  });
+};
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@schr0smi1ey.iioky.mongodb.net/?retryWrites=true&w=majority&appName=Schr0Smi1ey`;
@@ -27,34 +42,16 @@ const client = new MongoClient(uri, {
   },
 });
 
-const verifyToken = (req, res, next) => {
-  const accessToken = req.cookies.accessToken;
-  if (!accessToken) return res.status(401).send("Unauthorized Access");
-
-  jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) return res.status(403).send("Unauthorized Access");
-    req.user = decoded;
-    next();
-  });
-};
-
 const database = client.db("ArtifactHub");
 const userCollection = database.collection("users");
 const artifactCollection = database.collection("artifact");
 const likedArtifactCollection = database.collection("LikedArtifact");
+
 async function run() {
   try {
-    // Routes
     app.get("/", (req, res) => {
       res.send("Welcome to the Artifact Hub API");
     });
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
 
     // Auth Related API
     app.post("/jwt", (req, res) => {
@@ -87,6 +84,7 @@ async function run() {
         return res.status(403).send("Unauthorized Access");
       }
     });
+
     // Users
     app.post("/Users", async (req, res) => {
       const newUser = req.body;
