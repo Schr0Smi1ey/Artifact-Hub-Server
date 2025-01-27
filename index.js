@@ -25,8 +25,9 @@ const verifyToken = (req, res, next) => {
   if (!accessToken) return res.status(401).send("Unauthorized Access");
 
   jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) return res.status(403).send("Unauthorized Access");
+    if (err) return res.status(403).send("Forbidden Access");
     req.user = decoded;
+    console.log(req?.user);
     next();
   });
 };
@@ -38,7 +39,6 @@ const verifyAdmin = (req, res, next) => {
   jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) return res.status(403).send("Unauthorized Access");
     req.user = decoded;
-    const { email } = req.user;
     if (email.toLowerCase() !== process.env.ADMIN.toLowerCase()) {
       return res.status(403).send("Unauthorized Access");
     }
@@ -120,21 +120,36 @@ async function run() {
     });
 
     app.get("/Artifacts", async (req, res) => {
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
       const cursor = artifactCollection.find();
-      const result = await cursor.toArray();
+      const result = await cursor
+        .skip(page * size)
+        .limit(size)
+        .toArray();
       res.send(result);
     });
-    app.get("/my-artifacts", verifyToken, async (req, res) => {
+    app.get("/MyArtifacts", verifyToken, async (req, res) => {
       const { addedBy } = req.query;
-      console.log(addedBy);
       if (req.user.email !== addedBy) {
-        console.log(req.user.email);
         return res.status(403).send("Forbidden Access");
       }
       const cursor = artifactCollection.find({ addedBy });
       const result = await cursor.toArray();
       res.send(result);
     });
+    app.get("/MyArtifactCount", verifyToken, async (req, res) => {
+      const { addedBy } = req.query;
+      if (!addedBy) {
+        return res.status(400).send("Bad Request: 'addedBy' is required");
+      }
+      if (req.user?.email !== addedBy) {
+        return res.status(403).send("Forbidden Access");
+      }
+      const count = await artifactCollection.countDocuments({ addedBy });
+      res.send({ count });
+    });
+
     app.get("/Artifacts/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -142,6 +157,10 @@ async function run() {
       res.send(artifact);
     });
 
+    app.get("/ArtifactCount", async (req, res) => {
+      const count = await artifactCollection.estimatedDocumentCount();
+      res.send({ count });
+    });
     app.put("/Artifacts/:id", async (req, res) => {
       const id = req.params.id;
       const artifact = req.body;
@@ -194,6 +213,20 @@ async function run() {
         );
         res.status(200).json({ message: "Artifact liked successfully." });
       }
+    });
+    app.get("/MyLikedArtifactCount", verifyToken, async (req, res) => {
+      const { user_email } = req.query;
+      if (!user_email) {
+        return res.status(400).send("Bad Request: 'user_email' is required");
+      }
+      if (req.user?.email !== user_email) {
+        return res.status(403).send("Forbidden Access");
+      }
+      console.log(user_email);
+      const count = await likedArtifactCollection.countDocuments({
+        user_email,
+      });
+      res.send({ count });
     });
     app.get("/liked-artifacts", verifyToken, async (req, res) => {
       const { user_email } = req.query;

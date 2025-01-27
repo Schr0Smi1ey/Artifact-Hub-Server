@@ -90,7 +90,7 @@ The server is deployed on Vercel and can be accessed via:
 | GET    | /Artifacts/:id | Retrieve details of a specific artifact by ID |
 | PUT    | /Artifacts/:id | Update artifact details                       |
 | DELETE | /Artifacts/:id | Delete an artifact by ID                      |
-| GET    | /my-artifacts  | Fetch artifacts added by a specific user      |
+| GET    | /MyArtifacts   | Fetch artifacts added by a specific user      |
 
 ### **Like Functionality Routes**
 
