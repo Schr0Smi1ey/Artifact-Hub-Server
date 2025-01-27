@@ -27,7 +27,6 @@ const verifyToken = (req, res, next) => {
   jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) return res.status(403).send("Forbidden Access");
     req.user = decoded;
-    console.log(req?.user);
     next();
   });
 };
@@ -164,7 +163,6 @@ async function run() {
     app.put("/Artifacts/:id", async (req, res) => {
       const id = req.params.id;
       const artifact = req.body;
-      console.log(artifact);
       const result = await artifactCollection.updateOne(
         { _id: new ObjectId(id) },
         { $set: artifact }
@@ -222,7 +220,6 @@ async function run() {
       if (req.user?.email !== user_email) {
         return res.status(403).send("Forbidden Access");
       }
-      console.log(user_email);
       const count = await likedArtifactCollection.countDocuments({
         user_email,
       });
