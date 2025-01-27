@@ -114,10 +114,4 @@ The server is deployed on Vercel and can be accessed via:
 
 ---
 
-## License 🔒
-
-This project is licensed under the **MIT License**.
-
----
-
 Built with 💙 and passion by [Sarafat Karim](https://www.linkedin.com/in/sarafat-karim/).
