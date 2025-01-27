@@ -31,6 +31,21 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+const verifyAdmin = (req, res, next) => {
+  const accessToken = req.cookies.accessToken;
+  if (!accessToken) return res.status(401).send("Unauthorized Access");
+
+  jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) return res.status(403).send("Unauthorized Access");
+    req.user = decoded;
+    const { email } = req.user;
+    if (email.toLowerCase() !== process.env.ADMIN.toLowerCase()) {
+      return res.status(403).send("Unauthorized Access");
+    }
+    next();
+  });
+};
+
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@schr0smi1ey.iioky.mongodb.net/?retryWrites=true&w=majority&appName=Schr0Smi1ey`;
 
@@ -91,7 +106,7 @@ async function run() {
       const result = await userCollection.insertOne(newUser);
       res.send(result);
     });
-    app.get("/Users", async (req, res) => {
+    app.get("/Users", verifyAdmin, async (req, res) => {
       const cursor = userCollection.find();
       const result = await cursor.toArray();
       res.send(result);
