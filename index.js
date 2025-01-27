@@ -14,7 +14,7 @@ app.use(
       "https://artifacts-hub-schr0smi1ey.web.app",
       "https://artifacts-hub-schr0smi1ey.firebaseapp.com",
     ],
-    methods: "GET,POST,PUT,DELETE,PATCH",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   })
 );
@@ -97,6 +97,7 @@ async function run() {
       if (req.user.email !== req.query.email) {
         return res.status(403).send("Unauthorized Access");
       }
+      res.send({ success: true });
     });
 
     // Users
@@ -119,34 +120,56 @@ async function run() {
     });
 
     app.get("/Artifacts", async (req, res) => {
-      const page = parseInt(req.query.page);
-      const size = parseInt(req.query.size);
-      const cursor = artifactCollection.find();
-      const result = await cursor
-        .skip(page * size)
-        .limit(size)
-        .toArray();
-      res.send(result);
+      try {
+        const page = parseInt(req.query.page) || 0;
+        const size = parseInt(req.query.size) || 6;
+        const search = req.query.search || "";
+
+        let filter = {};
+        if (search && search !== "featuredArtifacts") {
+          filter = { artifactName: { $regex: search, $options: "i" } };
+        }
+
+        const cursor = artifactCollection.find(filter);
+        const totalCount = await artifactCollection.estimatedDocumentCount();
+        const result = await cursor
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+
+        res.send({
+          artifacts: result,
+          totalCount: totalCount,
+        });
+      } catch (error) {
+        res.status(500).send({ message: "Server error", error: error.message });
+      }
     });
+
     app.get("/MyArtifacts", verifyToken, async (req, res) => {
-      const { addedBy } = req.query;
-      if (req.user.email !== addedBy) {
-        return res.status(403).send("Forbidden Access");
+      try {
+        const page = parseInt(req.query.page) || 0;
+        const size = parseInt(req.query.size) || 6;
+        const search = req.query.search || "";
+        console.log(page, size, search);
+        const filter = search
+          ? {
+              artifactName: { $regex: search, $options: "i" },
+              addedBy: req.query.addedBy,
+            }
+          : { addedBy: req.query.addedBy };
+
+        const cursor = artifactCollection.find(filter);
+        const result = await cursor
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+        res.send({
+          artifacts: result,
+        });
+      } catch (error) {
+        res.status(500).send({ message: "Server error", error: error.message });
       }
-      const cursor = artifactCollection.find({ addedBy });
-      const result = await cursor.toArray();
-      res.send(result);
-    });
-    app.get("/MyArtifactCount", verifyToken, async (req, res) => {
-      const { addedBy } = req.query;
-      if (!addedBy) {
-        return res.status(400).send("Bad Request: 'addedBy' is required");
-      }
-      if (req.user?.email !== addedBy) {
-        return res.status(403).send("Forbidden Access");
-      }
-      const count = await artifactCollection.countDocuments({ addedBy });
-      res.send({ count });
     });
 
     app.get("/Artifacts/:id", async (req, res) => {
@@ -154,11 +177,6 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const artifact = await artifactCollection.findOne(query);
       res.send(artifact);
-    });
-
-    app.get("/ArtifactCount", async (req, res) => {
-      const count = await artifactCollection.estimatedDocumentCount();
-      res.send({ count });
     });
     app.put("/Artifacts/:id", async (req, res) => {
       const id = req.params.id;
