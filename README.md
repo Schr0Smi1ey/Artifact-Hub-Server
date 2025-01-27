@@ -1,4 +1,4 @@
-# Artifact Hub Backend Server 🏺🌍
+# Artifact Hub Backend Server 🔺🌍
 
 This is the backend server for **Artifact Hub**, a platform designed to catalog and explore historical artifacts. The server is built with **Express.js** and provides APIs for user authentication, artifact management, and like functionality. It seamlessly integrates with the frontend to ensure a smooth and secure user experience.
 
@@ -31,11 +31,11 @@ This is the backend server for **Artifact Hub**, a platform designed to catalog 
 
 ## 🔧 Technologies Used
 
-### **1. Backend Framework 🖧**
+### **1. Backend Framework 🛧️**
 
 - **Express.js**: Efficient and lightweight framework for RESTful APIs.
 
-### **2. Database 🗃️**
+### **2. Database 🔃**
 
 - **MongoDB**: NoSQL database for managing artifacts, users, and likes.
 
@@ -68,37 +68,39 @@ The server is deployed on Vercel and can be accessed via:
 
 ### **User Routes**
 
-| Method | Endpoint | Description                |
-| ------ | -------- | -------------------------- |
-| POST   | /Users   | Create a new user          |
-| GET    | /Users   | Fetch all registered users |
+| Method | Endpoint | Description                             |
+| ------ | -------- | --------------------------------------- |
+| POST   | `/Users` | Create a new user                       |
+| GET    | `/Users` | Fetch all registered users (Admin only) |
 
 ### **Authentication Routes**
 
-| Method | Endpoint    | Description                             |
-| ------ | ----------- | --------------------------------------- |
-| POST   | /jwt        | Generate JWT for user authentication    |
-| POST   | /logout     | Clear the JWT from cookies              |
-| GET    | /check-auth | Verify the user's authentication status |
+| Method | Endpoint      | Description                             |
+| ------ | ------------- | --------------------------------------- |
+| POST   | `/jwt`        | Generate JWT for user authentication    |
+| POST   | `/logout`     | Clear the JWT from cookies              |
+| GET    | `/check-auth` | Verify the user's authentication status |
 
 ### **Artifact Routes**
 
-| Method | Endpoint       | Description                                   |
-| ------ | -------------- | --------------------------------------------- |
-| POST   | /Artifacts     | Add new artifact details                      |
-| GET    | /Artifacts     | Retrieve all artifacts                        |
-| GET    | /Artifacts/:id | Retrieve details of a specific artifact by ID |
-| PUT    | /Artifacts/:id | Update artifact details                       |
-| DELETE | /Artifacts/:id | Delete an artifact by ID                      |
-| GET    | /MyArtifacts   | Fetch artifacts added by a specific user      |
+| Method | Endpoint         | Description                                             |
+| ------ | ---------------- | ------------------------------------------------------- |
+| POST   | `/Artifacts`     | Add new artifact details                                |
+| GET    | `/Artifacts`     | Retrieve all artifacts (supports pagination and search) |
+| GET    | `/Artifacts/:id` | Retrieve details of a specific artifact by ID           |
+| PUT    | `/Artifacts/:id` | Update artifact details                                 |
+| DELETE | `/Artifacts/:id` | Delete an artifact by ID                                |
+| PATCH  | `/Artifacts/:id` | Update specific fields (e.g., like count)               |
+| GET    | `/MyArtifacts`   | Fetch artifacts added by a specific user                |
 
 ### **Like Functionality Routes**
 
-| Method | Endpoint               | Description                                   |
-| ------ | ---------------------- | --------------------------------------------- |
-| PATCH  | /toggle-like/:id       | Like or dislike an artifact                   |
-| GET    | /liked-artifacts       | Fetch artifacts liked by a specific user      |
-| GET    | /check-like-status/:id | Check if a user has liked a specific artifact |
+| Method | Endpoint                 | Description                                   |
+| ------ | ------------------------ | --------------------------------------------- |
+| PATCH  | `/toggle-like/:id`       | Like or dislike an artifact                   |
+| GET    | `/liked-artifacts`       | Fetch artifacts liked by a specific user      |
+| GET    | `/check-like-status/:id` | Check if a user has liked a specific artifact |
+| GET    | `/MyLikedArtifactCount`  | Get the count of artifacts liked by a user    |
 
 ---
 
@@ -112,4 +114,10 @@ The server is deployed on Vercel and can be accessed via:
 
 ---
 
-Built with 💙 and passion by [Sarafat Karim](https://www.linkedin.com/in/sarafat-karim/)
+## License 🔒
+
+This project is licensed under the **MIT License**.
+
+---
+
+Built with 💙 and passion by [Sarafat Karim](https://www.linkedin.com/in/sarafat-karim/).
