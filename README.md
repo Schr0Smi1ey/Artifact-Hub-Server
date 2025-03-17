@@ -3,6 +3,12 @@
 This is the backend server for **Artifact Hub**, a platform designed to catalog and explore historical artifacts. The server is built with **Express.js** and provides APIs for user authentication, artifact management, and like functionality. It seamlessly integrates with the frontend to ensure a smooth and secure user experience.
 
 ---
+## 🌍 Root API URL
+
+The server is deployed on Vercel and can be accessed via:
+
+- **[https://artifact-hub.vercel.app](https://artifact-hub-server.vercel.app/)**
+---
 
 ## 🌟 Key Features
 
@@ -53,14 +59,6 @@ This is the backend server for **Artifact Hub**, a platform designed to catalog 
 ### **5. Deployment 🚀**
 
 - **Vercel**: Provides smooth and high-performance hosting for the backend server.
-
----
-
-## 🌍 Root API URL
-
-The server is deployed on Vercel and can be accessed via:
-
-- **[https://artifact-hub.vercel.app](https://artifact-hub-server.vercel.app/)**
 
 ---
 
